@@ -61,7 +61,12 @@
 
         return {
             restrict: 'A',
-            scope: { ngJcrop: '=', thumbnail: '=', selection: '=' },
+            scope: { ngJcrop: '=', thumbnail: '=', selection: '=', getPreviewFn: '=' },
+            link: function($scope){
+                $scope.updateCustomPreview = function(data){
+                    $scope.getPreviewFn(data);
+                }
+            },
             template: ngJcropConfig.template,
             controller: 'JcropController'
         };
@@ -167,7 +172,7 @@
         $scope.getShrinkRatio = function(){
             var img = $('<img>').attr('src', $scope.mainImg[0].src)[0];
 
-            if(ngJcropConfig.jcrop.maxWidth > img.width || ngJcropConfig.jcrop.maxHeight > img.height){
+            if(ngJcropConfig.jcrop.maxWidth > img.width || ngJcropConfig.jcrop.maxHeight > img.height) {
                 return 1;
             }
 
@@ -222,21 +227,20 @@
                 });
             }
 
-            if( !$scope.thumbnail ){
-                return;
-            }
-
             var rx = parseInt($scope.previewImgStyle.width) / coords.w;
             var ry = parseInt($scope.previewImgStyle.height) / coords.h;
 
-            $scope.previewImg.css({
+            var styles = {
                 width: Math.round(rx * $scope.imgStyle.width) + 'px',
                 maxWidth: Math.round(rx * $scope.imgStyle.width) + 'px',
                 height: Math.round(ry * $scope.imgStyle.height) + 'px',
                 maxHeight: Math.round(ry * $scope.imgStyle.height) + 'px',
                 marginLeft: '-' + Math.round(rx * coords.x) + 'px',
                 marginTop: '-' + Math.round(ry * coords.y) + 'px'
-            });
+            };
+
+            $scope.previewImg.css(styles);
+            $scope.updateCustomPreview(styles);
         };
 
         /**
